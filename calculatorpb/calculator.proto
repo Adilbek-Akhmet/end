@@ -22,6 +22,6 @@ message AverageRequest{
 
 service CalculatorService {
     rpc Decomposition(DecomposeRequest) returns (stream DecomposeResponse) {}
-    rpc Average(stream AverageRequest) returns (AverageRequest
+    rpc Average(stream AverageRequest) returns (AverageRequest){}
 
 
