@@ -11,7 +11,7 @@ import (
 
 func doManyTimesFromServer(c calculatorpb.CalculatorServiceClient) {
 	ctx := context.Background()
-	req := &calculatorpb.PrimeNumberDecompositionRequest{Number: 120}
+	req := &calculatorpb.DecompositionRequest{Num: 120}
 
 	stream, err := c.Decomposition(ctx, req)
 	if err != nil {
@@ -28,25 +28,30 @@ LOOP:
 		if err != nil {
 			log.Fatalf("error %v", err)
 		}
-		log.Printf("response:%v \n", res.GetResult())
+		log.Printf("response:%v \n", res.GetDecompose())
 	}
 }
 
-func doLongCalculateAverage(c calculatorpb.CalculatorServiceClient) {
-	requests := []*calculatorpb.AverageRequest{
-		{
-			Number: 1,
-		},
-		{
-			Number: 2,
-		},
-		{
-			Number: 3,
-		},
-		{
-			Number: 4,
-		},
+func doClientStreaming(c calculatorpb.CalculatorServiceClient) {
+	fmt.Println("Starting to do a Average server streaming RPC...")
+	stream, err := c.Average(context.Background())
+	if err != nil {
+		log.Fatalf("Error: %v", err)
 	}
+	numbers := []int32{3, 8, 12}
+	for _, number := range numbers {
+		fmt.Printf("Sending number: %v\n", number)
+		stream.Send(&calculatorpb.AverageRequest{
+			Num: number,
+		})
+	}
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error while receiving response: %v", err)
+	}
+	fmt.Printf("The Average is: %v\n", res.GetAvg())
+}
+
 
 	ctx := context.Background()
 	stream, err := c.Average(ctx)

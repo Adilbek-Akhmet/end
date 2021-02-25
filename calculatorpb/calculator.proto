@@ -13,11 +13,11 @@ message DecomposeResponse {
 }
 
 message AverageRequest{
-    float num = 1;
+    float32 num = 1;
 }
 
 message AverageRequest{
-    float avg = 1;
+    float32 avg = 1;
 }
 
 service CalculatorService {

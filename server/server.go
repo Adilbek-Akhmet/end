@@ -13,50 +13,49 @@ type Server struct {
 	calculatorpb.UnimplementedCalculatorServiceServer
 }
 
-func (*Server) PrimeNumberDecomposition(req *calculatorpb.DecompositionRequest, stream calculatorpb.CalculatorService_DecompositionServer) error {
-	fmt.Printf("PrimeNumberDecomposition function was invoked with %v \n", req)
-	number := req.GetNumber()
-	var factor int64 = 2
+func (*Server) Decomposition(req *calculatorpb.DecompositionRequest, stream calculatorpb.CalculatorService_DecompositionServer) error {
+	fmt.Printf("Decomposition function was invoked with %v \n", req)
+	number := req.GetNum()
+	var divide int64 = 2
 
 	for number > 1 {
-		if number%factor == 0 {
-			res := &calculatorpb.DecompositionResponse{Result: factor}
+		if number%divide == 0 {
+			res := &calculatorpb.DecompositionResponse{Decompose: divide}
 			err := stream.Send(res)
 			if err != nil {
 				log.Fatalf("error: %v", err.Error())
 			}
-			number = number / factor
+			number = number / divide
 			time.Sleep(time.Second)
 		} else {
-			factor++
+			divide++
 		}
 	}
 
 	return nil
 }
 
-func (*Server) Average(stream calculatorpb.CalculatorService_AverageServer) error {
-	fmt.Printf("Average function was invoked with a streaming request\n")
-
-	var sum int64 = 0
-	var count int64 = 0
-
+func (*server) Average(stream calculatorpb.CalculatorService_AverageServer) error {
+	log.Println("Average called..")
+	var total float32
+	var count int
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
-			average := float64(sum) / float64(count)
-			return stream.SendAndClose(&calculatorpb.AverageResponse{
-				Result: average,
-			})
+			resp := &calculatorpb.AverageResponse{
+				Avg: total / float32(count),
+			}
+			return stream.SendAndClose(resp)
 		}
 		if err != nil {
-			log.Fatalf("Error: %v", err)
+			log.Fatalf("err while Recv Average %v", err)
+			return err
 		}
-		sum += req.GetNumber()
+		log.Printf("receive req %v", req)
+		total += req.GetNum()
 		count++
 	}
 }
-
 func main() {
 	l, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
