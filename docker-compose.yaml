@@ -1,0 +1,16 @@
+version: "3"
+services:
+  client:
+    build: ./calculator/client
+    command: /app/calculator/client/client
+    restart: always
+    links:
+      - server
+    depends_on:
+      - server
+  server:
+    build: calculator/server
+    command: /app/calculator/server/server
+    restart: always
+    ports:
+      - 50051:50051
